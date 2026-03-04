@@ -91,3 +91,6 @@ workflow.add_conditional_edges(
 )
 
 app = workflow.compile()
+
+if __name__ == "__main__":
+    print("Agent workflow compiled successfully.")

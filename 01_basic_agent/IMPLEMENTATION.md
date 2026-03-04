@@ -90,6 +90,8 @@ LLM_MODEL=gpt-4o-mini
 
 ## Running the Project
 
+### Option 1: Docker Compose (Recommended)
+
 ```bash
 cd 01_basic_agent
 docker compose up --build
@@ -97,6 +99,94 @@ docker compose up --build
 
 - UI: http://localhost:8501
 - API docs: http://localhost:8000/docs
+
+---
+
+### Option 2: Terminal Commands (Local Development)
+
+#### Step 1: Setup Virtual Environment (First Time Only)
+
+**Windows PowerShell:**
+```powershell
+# Create and activate virtual environment
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+
+# Install dependencies for API
+cd 01_basic_agent\api
+pip install -r requirements.txt
+
+# Install dependencies for UI
+cd ..\ui
+pip install -r requirements.txt
+```
+
+---
+
+#### Step 2: Start API Server
+
+**Terminal 1 (API Server):**
+```powershell
+# Activate virtual environment
+.\.venv\Scripts\Activate.ps1
+
+# Navigate to API folder
+cd 01_basic_agent\api
+
+# Start API server (runs on port 8000)
+python main.py
+```
+
+You should see:
+```
+INFO:     Uvicorn running on http://0.0.0.0:8000
+```
+
+Test health endpoint:
+```powershell
+Invoke-WebRequest -Uri "http://localhost:8000/health" -UseBasicParsing
+```
+
+---
+
+#### Step 3: Start Streamlit UI
+
+**Terminal 2 (Streamlit UI):**
+```powershell
+# Activate virtual environment
+.\.venv\Scripts\Activate.ps1
+
+# Navigate to UI folder
+cd 01_basic_agent\ui
+
+# Start Streamlit app (runs on port 8501)
+streamlit run app.py
+```
+
+You should see:
+```
+You can now view your Streamlit app in your browser.
+Local URL: http://localhost:8501
+```
+
+---
+
+#### Access Points
+
+| Service | URL |
+|---------|-----|
+| **UI** | http://localhost:8501 |
+| **API Health** | http://localhost:8000/health |
+| **API Docs (Swagger)** | http://localhost:8000/docs |
+
+---
+
+#### Important Notes
+
+1. **Two separate terminals required:** API server (Terminal 1) must run while UI (Terminal 2) makes requests
+2. **.env file:** Ensure `GEMINI_API_KEY` or `OPENAI_API_KEY` is set before starting
+3. **Recursion limit:** Graph compiles with `recursion_limit=5` to limit iterations
+4. **Port conflicts:** If ports 8000 or 8501 are in use, modify the port settings
 
 ---
 

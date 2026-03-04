@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from agent import app as agent_app
+from agent import app
 
 app = FastAPI(title="Medical Agent API")
 
@@ -27,7 +27,7 @@ async def analyze_symptoms(request: AnalyzeRequest):
             "is_approved": False
         }
         
-        result = agent_app.invoke(
+        result = app.invoke(
             initial_state, 
             config={"recursion_limit": 5}
         )
