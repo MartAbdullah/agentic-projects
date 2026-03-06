@@ -85,11 +85,76 @@ requests>=2.31.0
 ## Environment File (`.env`)
 
 ```env
-OPENAI_API_KEY=sk-...
-LLM_MODEL=gpt-4o-mini
+OGEMINI_API_KEY=.....
+LLM_MODEL=gemini/.....
+```
+**Windows PowerShell:**
+```powershell
+# Create and activate virtual environment
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+
+# Install dependencies for API
+cd 02_intermediate_agent\api
+pip install -r requirements.txt
+
+# Install dependencies for UI
+cd ..\ui
+pip install -r requirements.txt
 ```
 
 ---
+
+#### Step 2: Start API Server
+
+**Terminal 1 (API Server):**
+```powershell
+# Activate virtual environment
+.\.venv\Scripts\Activate.ps1
+
+# Navigate to API folder
+cd 02_intermediate_agent\api
+
+# Start API server (runs on port 8000)
+python main.py
+```
+
+You should see:
+```
+INFO:     Uvicorn running on http://0.0.0.0:8000
+```
+
+Test health endpoint:
+```powershell
+Invoke-WebRequest -Uri "http://localhost:8000/health" -UseBasicParsing
+```
+
+You should see:
+```json
+{"status": "ok"}
+```
+
+---
+
+**Terminal 2 (UI Server):**
+```powershell
+# Activate virtual environment
+.\venv\Scripts\Activate.ps1
+
+# Navigate to UI folder
+cd 02_intermediate_agent\ui
+
+# Start Streamlit UI (runs on port 8501)
+streamlit run app.py
+```
+
+You should see:
+```
+You can now view your Streamlit app in your browser.
+
+Local URL: http://localhost:8501
+```
+
 
 ## Running the Project
 
