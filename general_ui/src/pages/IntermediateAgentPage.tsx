@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Send, Loader2, Users } from 'lucide-react';
+import { SendIcon, Loader2Icon, UsersIcon } from '../icons';
 
 interface SpecialistAnalysis {
   specialist: string;
@@ -69,7 +69,7 @@ export default function IntermediateAgentPage() {
   };
 
   return (
-    <div className="min-h-screen px-4 py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen px-4 py-8 sm:px-6 lg:px-8 overflow-auto">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-12">
@@ -90,7 +90,7 @@ export default function IntermediateAgentPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Input Section */}
           <div className="lg:col-span-1">
-            <div className="bg-slate-800 border border-slate-700 rounded-lg p-6 sticky top-20 space-y-6">
+            <div className="bg-slate-800 border border-slate-700 rounded-lg p-6 space-y-6">
               {/* Medical Case Input */}
               <div>
                 <h2 className="text-xl font-bold text-white mb-4">Medical Case</h2>
@@ -129,12 +129,12 @@ export default function IntermediateAgentPage() {
                 >
                   {loading ? (
                     <>
-                      <Loader2 size={20} className="animate-spin" />
+                      <Loader2Icon size={20} className="animate-spin" />
                       <span>Analyzing...</span>
                     </>
                   ) : (
                     <>
-                      <Send size={20} />
+                      <SendIcon size={20} />
                       <span>Analyze</span>
                     </>
                   )}
@@ -172,7 +172,7 @@ export default function IntermediateAgentPage() {
 
             {loading && (
               <div className="bg-slate-800 border border-slate-700 rounded-lg p-12 text-center">
-                <Loader2 size={48} className="animate-spin text-purple-400 mx-auto mb-4" />
+                <Loader2Icon size={48} className="animate-spin text-purple-400 mx-auto mb-4" />
                 <p className="text-gray-400">
                   Analyzing case with {specialistsCount} specialist{specialistsCount !== 1 ? 's' : ''}...<br />
                   <span className="text-sm">Running specialist analyses in parallel</span>
@@ -185,7 +185,7 @@ export default function IntermediateAgentPage() {
                 {/* Case Summary */}
                 <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
                   <h3 className="text-lg font-semibold text-white mb-3 flex items-center space-x-2">
-                    <Users size={20} className="text-purple-400" />
+                    <UsersIcon size={20} className="text-purple-400" />
                     <span>Case Overview</span>
                   </h3>
                   <p className="text-gray-300">{result.case_summary}</p>
@@ -257,7 +257,7 @@ export default function IntermediateAgentPage() {
             {!result && !loading && !error && (
               <div className="bg-slate-800 border border-slate-700 rounded-lg p-12 text-center">
                 <div className="w-16 h-16 bg-purple-500/20 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <Users size={32} className="text-purple-400" />
+                  <UsersIcon size={32} className="text-purple-400" />
                 </div>
                 <p className="text-gray-400">
                   Enter a medical case to analyze it with multiple specialist perspectives.

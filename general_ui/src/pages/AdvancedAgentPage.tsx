@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Upload, Loader2, Edit2, Check, X, FileText } from 'lucide-react';
+import { UploadIcon, Loader2Icon, Edit2Icon, CheckIcon, XIcon, FileTextIcon } from '../icons';
+import Footer from '../components/Footer';
 
 interface ExtractionResult {
   conditions: string[];
@@ -189,8 +190,9 @@ export default function AdvancedAgentPage() {
   };
 
   return (
-    <div className="min-h-screen px-4 py-12 sm:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto">
+    <div className="flex flex-col min-h-screen">
+      <div className="flex-1 px-4 py-8 sm:px-6 lg:px-8 overflow-auto">
+        <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-12">
           <div className="inline-flex items-center space-x-3 bg-orange-500/10 border border-orange-500/20 rounded-lg px-4 py-2 mb-4">
@@ -210,7 +212,8 @@ export default function AdvancedAgentPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Input Section */}
           <div className="lg:col-span-1">
-            <div className="bg-slate-800 border border-slate-700 rounded-lg p-6 sticky top-20">
+          {/* Tabs */}
+          <div className="flex space-x-2 bg-slate-700 p-1 rounded-lg">
               {processingState.status === 'idle' ? (
                 <div className="space-y-6">
                   {/* Tabs */}
@@ -244,7 +247,7 @@ export default function AdvancedAgentPage() {
                       <div className="border-2 border-dashed border-slate-600 rounded-lg p-8 text-center hover:border-orange-500 transition-colors cursor-pointer">
                         <label className="cursor-pointer">
                           <div className="flex flex-col items-center space-y-2">
-                            <Upload size={32} className="text-orange-400" />
+                            <UploadIcon size={32} className="text-orange-400" />
                             <p className="text-white font-semibold">Drop files here</p>
                             <p className="text-sm text-gray-400">or click to select</p>
                             <input
@@ -264,7 +267,7 @@ export default function AdvancedAgentPage() {
                               key={file.name}
                               className="bg-slate-700 border border-slate-600 rounded p-3 flex items-center space-x-2"
                             >
-                              <FileText size={18} className="text-orange-400" />
+                              <FileTextIcon size={18} className="text-orange-400" />
                               <span className="text-sm text-gray-300">{file.name}</span>
                             </div>
                           ))}
@@ -277,12 +280,12 @@ export default function AdvancedAgentPage() {
                       >
                         {loading ? (
                           <>
-                            <Loader2 size={20} className="animate-spin" />
+                            <Loader2Icon size={20} className="animate-spin" />
                             <span>Processing...</span>
                           </>
                         ) : (
                           <>
-                            <Upload size={20} />
+                            <UploadIcon size={20} />
                             <span>Process Files</span>
                           </>
                         )}
@@ -318,12 +321,12 @@ export default function AdvancedAgentPage() {
                       >
                         {loading ? (
                           <>
-                            <Loader2 size={20} className="animate-spin" />
+                            <Loader2Icon size={20} className="animate-spin" />
                             <span>Processing...</span>
                           </>
                         ) : (
                           <>
-                            <Upload size={20} />
+                            <UploadIcon size={20} />
                             <span>Process Selected</span>
                           </>
                         )}
@@ -369,7 +372,7 @@ export default function AdvancedAgentPage() {
 
             {loading && processingState.status === 'idle' && (
               <div className="bg-slate-800 border border-slate-700 rounded-lg p-12 text-center">
-                <Loader2 size={48} className="animate-spin text-orange-400 mx-auto mb-4" />
+                <Loader2Icon size={48} className="animate-spin text-orange-400 mx-auto mb-4" />
                 <p className="text-gray-400">
                   Processing clinical documents...<br />
                   <span className="text-sm">Extracting conditions, medications, and generating SOAP note</span>
@@ -401,7 +404,7 @@ export default function AdvancedAgentPage() {
                 <div>
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="text-lg font-semibold text-white flex items-center space-x-2">
-                      <Edit2 size={20} className="text-orange-400" />
+                      <Edit2Icon size={20} className="text-orange-400" />
                       <span>SOAP Note Draft</span>
                     </h3>
                     {processingState.status === 'awaiting_approval' && (
@@ -428,12 +431,12 @@ export default function AdvancedAgentPage() {
                     >
                       {loading ? (
                         <>
-                          <Loader2 size={20} className="animate-spin" />
+                          <Loader2Icon size={20} className="animate-spin" />
                           <span>Approving...</span>
                         </>
                       ) : (
                         <>
-                          <Check size={20} />
+                          <CheckIcon size={20} />
                           <span>Approve & Finalize</span>
                         </>
                       )}
@@ -442,7 +445,7 @@ export default function AdvancedAgentPage() {
                       onClick={handleReset}
                       className="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-semibold py-3 px-4 rounded-lg transition-all flex items-center justify-center space-x-2"
                     >
-                      <X size={20} />
+                      <XIcon size={20} />
                       <span>Cancel</span>
                     </button>
                   </div>
@@ -451,7 +454,7 @@ export default function AdvancedAgentPage() {
                 {processingState.status === 'completed' && (
                   <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-6">
                     <div className="flex items-center space-x-3">
-                      <Check size={24} className="text-green-400" />
+                      <CheckIcon size={24} className="text-green-400" />
                       <div>
                         <p className="font-semibold text-green-300">SOAP Note Finalized</p>
                         <p className="text-sm text-green-200">The clinical document has been processed and approved.</p>
@@ -465,7 +468,7 @@ export default function AdvancedAgentPage() {
             {processingState.status === 'idle' && !loading && (
               <div className="bg-slate-800 border border-slate-700 rounded-lg p-12 text-center">
                 <div className="w-16 h-16 bg-orange-500/20 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <FileText size={32} className="text-orange-400" />
+                  <FileTextIcon size={32} className="text-orange-400" />
                 </div>
                 <p className="text-gray-400 mb-4">
                   Upload or select clinical documents to process.
@@ -495,6 +498,10 @@ export default function AdvancedAgentPage() {
           </div>
         )}
       </div>
+      </div>
+
+      {/* Footer */}
+      <Footer showNews={false} />
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Send, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import { SendIcon, Loader2Icon, CheckCircleIcon, AlertCircleIcon } from '../icons';
 
 interface AnalysisResult {
   status: string;
@@ -53,7 +53,7 @@ export default function BasicAgentPage() {
   };
 
   return (
-    <div className="min-h-screen px-4 py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen px-4 py-8 sm:px-6 lg:px-8 overflow-auto">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-12">
@@ -74,7 +74,7 @@ export default function BasicAgentPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Input Section */}
           <div className="lg:col-span-1">
-            <div className="bg-slate-800 border border-slate-700 rounded-lg p-6 sticky top-20">
+            <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
               <h2 className="text-xl font-bold text-white mb-4">Patient Symptoms</h2>
 
               <div className="space-y-4">
@@ -93,12 +93,12 @@ export default function BasicAgentPage() {
                   >
                     {loading ? (
                       <>
-                        <Loader2 size={20} className="animate-spin" />
+                        <Loader2Icon size={20} className="animate-spin" />
                         <span>Analyzing...</span>
                       </>
                     ) : (
                       <>
-                        <Send size={20} />
+                        <SendIcon size={20} />
                         <span>Analyze</span>
                       </>
                     )}
@@ -127,7 +127,7 @@ export default function BasicAgentPage() {
             {error && (
               <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-6 mb-6">
                 <div className="flex items-start space-x-4">
-                  <AlertCircle size={24} className="text-red-400 flex-shrink-0 mt-0.5" />
+                  <AlertCircleIcon size={24} className="text-red-400 flex-shrink-0 mt-0.5" />
                   <div>
                     <h3 className="font-semibold text-red-300 mb-1">Error</h3>
                     <p className="text-red-200">{error}</p>
@@ -138,7 +138,7 @@ export default function BasicAgentPage() {
 
             {loading && (
               <div className="bg-slate-800 border border-slate-700 rounded-lg p-12 text-center">
-                <Loader2 size={48} className="animate-spin text-blue-400 mx-auto mb-4" />
+                <Loader2Icon size={48} className="animate-spin text-blue-400 mx-auto mb-4" />
                 <p className="text-gray-400">
                   Running reflection loop...<br />
                   <span className="text-sm">Generating and critiquing summary</span>
@@ -151,7 +151,7 @@ export default function BasicAgentPage() {
                 {/* Status */}
                 <div className={`border rounded-lg p-6 ${result.status === 'approved' ? 'bg-green-500/10 border-green-500/30' : 'bg-yellow-500/10 border-yellow-500/30'}`}>
                   <div className="flex items-center space-x-3">
-                    <CheckCircle size={24} className={result.status === 'approved' ? 'text-green-400' : 'text-yellow-400'} />
+                    <CheckCircleIcon size={24} className={result.status === 'approved' ? 'text-green-400' : 'text-yellow-400'} />
                     <div>
                       <p className="font-semibold text-white capitalize">{result.status}</p>
                       {result.iterations && (

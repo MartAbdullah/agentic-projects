@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Menu } from 'lucide-react';
+import { MenuIcon } from '../icons';
 import { useState } from 'react';
 
 export default function Navbar() {
@@ -14,7 +14,7 @@ export default function Navbar() {
             <div className="w-8 h-8 bg-gradient-to-br from-purple-400 to-pink-600 rounded-lg flex items-center justify-center group-hover:shadow-lg group-hover:shadow-purple-500/50 transition-all">
               <span className="text-white font-bold text-lg">A</span>
             </div>
-            <span className="text-white font-bold text-xl hidden sm:inline">Agentic Suite</span>
+            <span className="text-white font-bold text-xl hidden sm:inline">Gezonheid</span>
           </Link>
 
           {/* Desktop Menu */}
@@ -38,7 +38,7 @@ export default function Navbar() {
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="md:hidden text-gray-300 hover:text-white"
           >
-            <Menu size={24} />
+            <MenuIcon size={24} />
           </button>
         </div>
 
