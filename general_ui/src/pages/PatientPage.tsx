@@ -7,6 +7,7 @@ export default function PatientPage() {
 
   const patientProfile = {
     name: 'John Doe',
+    avatarUrl: 'https://i.pravatar.cc/160?img=12',
     age: 45,
     bloodType: 'O+',
     allergies: ['Penicillin', 'Latex'],
@@ -79,8 +80,12 @@ export default function PatientPage() {
               <h2 className="text-3xl font-bold text-white mb-2">{patientProfile.name}</h2>
               <p className="text-gray-400">Patient ID: PAT-2026-00451</p>
             </div>
-            <div className="bg-gradient-to-br from-blue-600 to-purple-600 p-4 rounded-lg">
-              <UserIcon size={40} className="text-white" />
+            <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-blue-400/50 bg-slate-700">
+              <img
+                src={patientProfile.avatarUrl}
+                alt={`${patientProfile.name} avatar`}
+                className="w-full h-full object-cover"
+              />
             </div>
           </div>
 

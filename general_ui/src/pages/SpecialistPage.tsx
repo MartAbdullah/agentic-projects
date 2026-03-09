@@ -1,6 +1,29 @@
 import { useState } from 'react';
 import { MailIcon, PhoneIcon, MapPinIcon, ClockIcon, SearchIcon, StethoscopeIcon, SPECIALTY_ICONS } from '../icons';
 
+const DOCTOR_PHOTOS: Record<string, string> = {
+  general_practitioner: 'https://randomuser.me/api/portraits/women/44.jpg',
+  cardiologist: 'https://randomuser.me/api/portraits/men/32.jpg',
+  neurologist: 'https://randomuser.me/api/portraits/women/65.jpg',
+  nephrologist: 'https://randomuser.me/api/portraits/men/52.jpg',
+  pulmonologist: 'https://randomuser.me/api/portraits/women/47.jpg',
+  hematologist: 'https://randomuser.me/api/portraits/men/73.jpg',
+  endocrinologist: 'https://randomuser.me/api/portraits/women/28.jpg',
+  oncologist: 'https://randomuser.me/api/portraits/men/41.jpg',
+  geriatrician: 'https://randomuser.me/api/portraits/women/53.jpg',
+  psychiatrist: 'https://randomuser.me/api/portraits/men/15.jpg',
+  infectious_disease: 'https://randomuser.me/api/portraits/women/36.jpg',
+  rheumatologist: 'https://randomuser.me/api/portraits/men/61.jpg',
+  vascular_surgeon: 'https://randomuser.me/api/portraits/men/75.jpg',
+  cardiothoracic_surgeon: 'https://randomuser.me/api/portraits/men/26.jpg',
+  radiologist: 'https://randomuser.me/api/portraits/women/57.jpg',
+  clinical_pharmacist: 'https://randomuser.me/api/portraits/men/36.jpg',
+  dietitian: 'https://randomuser.me/api/portraits/women/49.jpg',
+  physiotherapist: 'https://randomuser.me/api/portraits/men/45.jpg',
+  palliative_care: 'https://randomuser.me/api/portraits/women/33.jpg',
+  emergency_physician: 'https://randomuser.me/api/portraits/men/58.jpg',
+};
+
 export default function SpecialistPage() {
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -240,10 +263,10 @@ export default function SpecialistPage() {
         <div className="mb-12">
           <div className="inline-flex items-center space-x-3 bg-purple-500/10 border border-purple-500/20 rounded-lg px-4 py-2 mb-4">
             <StethoscopeIcon size={20} className="text-purple-400" />
-            <span className="text-purple-300 font-semibold">Specialist Directory</span>
+            <span className="text-purple-300 font-semibold">Specialist Portal</span>
           </div>
 
-          <h1 className="text-4xl font-bold text-white mb-4">Our Specialists</h1>
+          <h1 className="text-4xl font-bold text-white mb-4">Specialist Dashboard</h1>
           <p className="text-gray-400 text-lg mb-8">
             Access our network of {specialists.length} expert medical specialists
           </p>
@@ -270,11 +293,19 @@ export default function SpecialistPage() {
               key={specialist.key}
               className="bg-slate-800 border border-slate-700 rounded-lg overflow-hidden hover:border-purple-500 transition-all hover:shadow-lg hover:shadow-purple-500/20"
             >
-              {/* Card Header with Specialty Icon */}
-              <div className="bg-gradient-to-r from-purple-600 to-pink-600 p-6 flex items-start justify-between">
-                <div className="flex-1">
-                  <h3 className="text-xl font-bold text-white mb-1">{specialist.name}</h3>
-                  <p className="text-purple-100 font-semibold">{specialist.specialty}</p>
+              {/* Card Header with Doctor Photo + Specialty Icon */}
+              <div className="bg-gradient-to-r from-purple-600 to-pink-600 p-6 flex items-start justify-between gap-4">
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <img
+                    src={DOCTOR_PHOTOS[specialist.key]}
+                    alt={`${specialist.name} profile photo`}
+                    className="w-16 h-16 rounded-full object-cover border-2 border-white/40 flex-shrink-0"
+                    loading="lazy"
+                  />
+                  <div className="min-w-0">
+                    <h3 className="text-xl font-bold text-white mb-1 truncate">{specialist.name}</h3>
+                    <p className="text-purple-100 font-semibold truncate">{specialist.specialty}</p>
+                  </div>
                 </div>
                 {SpecialtyIcon && <SpecialtyIcon size={48} className="flex-shrink-0 ml-4" />}
               </div>
