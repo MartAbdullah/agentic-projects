@@ -47,23 +47,40 @@ def critic_node(state: AgentState):
         "Review the following medical summary. Ensure: \n"
         "1. No explicit diagnosis is made.\n"
         "2. Professional tone.\n"
-        "3. No hallucinations.\n"
-        "Output your response in JSON format with keys 'is_approved' (bool) and 'feedback' (str).\n\n"
-        f"Summary: {draft}"
+        "3. No hallucinations.\n\n"
+        "Respond ONLY with a valid JSON object (no additional text) with exactly these keys:\n"
+        '{"is_approved": true/false, "feedback": "your feedback here"}\n\n'
+        f"Summary to review:\n{draft}"
     )
     
-    response = completion(
-        model=LLM_MODEL,
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.0,
-        response_format={"type": "json_object"}
-    )
+    try:
+        response = completion(
+            model=LLM_MODEL,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.0
+        )
+        
+        response_text = response.choices[0].message.content.strip()
+        # Extract JSON from response (handle cases where model adds extra text)
+        if "{" in response_text and "}" in response_text:
+            json_start = response_text.find("{")
+            json_end = response_text.rfind("}") + 1
+            json_str = response_text[json_start:json_end]
+            result = json.loads(json_str)
+        else:
+            result = json.loads(response_text)
+        
+        is_approved = result.get("is_approved", False)
+        feedback = result.get("feedback", "No feedback provided")
+    except (json.JSONDecodeError, KeyError, AttributeError, ValueError) as e:
+        # JSON parsing failed, assume not approved
+        is_approved = False
+        feedback = "Review completed - improvements needed"
     
-    result = json.loads(response.choices[0].message.content)
     return {
-        "is_approved": result["is_approved"],
-        "feedback": result["feedback"],
-        "messages": [f"[CRITIC]: approved={result['is_approved']} | Feedback: {result['feedback']}"]
+        "is_approved": is_approved,
+        "feedback": feedback,
+        "messages": [f"[CRITIC]: approved={is_approved} | Feedback: {feedback}"]
     }
 
 def should_continue(state: AgentState):

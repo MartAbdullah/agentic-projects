@@ -1,8 +1,18 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from agent import app
+from agent import app as graph
 
 app = FastAPI(title="Medical Agent API")
+
+# CORS middleware for React UI
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class AnalyzeRequest(BaseModel):
     text: str
@@ -27,7 +37,7 @@ async def analyze_symptoms(request: AnalyzeRequest):
             "is_approved": False
         }
         
-        result = app.invoke(
+        result = graph.invoke(
             initial_state, 
             config={"recursion_limit": 5}
         )

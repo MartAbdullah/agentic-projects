@@ -1,18 +1,60 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { SendIcon, Loader2Icon, CheckCircleIcon, AlertCircleIcon } from '../icons';
 
 interface AnalysisResult {
-  status: string;
-  draft: string;
-  feedback?: string;
-  iterations?: number;
+  final_summary: string;
+  history: string[];
+  status?: string;
 }
+
+interface Patient {
+  id: string;
+  name: string;
+  condition: string;
+  caseId: string;
+  caseText: string;
+}
+
+const PATIENTS: Record<string, Patient> = {
+  patient1: {
+    id: 'PAT-2026-00451',
+    name: 'James Wilson (Acute Meningitis)',
+    condition: 'Acute Meningitis',
+    caseId: 'case1',
+    caseText: 'Patient is a 45-year-old male with a 3-day history of:\n- Severe headache (9/10 intensity), photophobia, neck stiffness\n- Nausea and one episode of vomiting\n- Temperature 38.7°C, HR 94\n- CBC: WBC 14,200 (elevated), neutrophils 85%\n- CSF: cloudy, protein elevated, glucose low',
+  },
+  patient2: {
+    id: 'PAT-2026-00452',
+    name: 'Margaret Thompson (Heart Failure)',
+    condition: 'Decompensated Heart Failure',
+    caseId: 'case2',
+    caseText: '68-year-old female with a 2-week history of progressive shortness of breath,\nbilateral leg swelling, and orthopnea. She reports a 5 kg weight gain over\nthe past month. Past medical history: hypertension, type 2 diabetes.\nMedications: metformin, amlodipine. Exam: JVP elevated, bilateral crackles,\npitting edema to knees. ECG: sinus tachycardia, LBBB.\nBNP: 1,450 pg/mL (elevated). CXR: cardiomegaly, pulmonary congestion.',
+  },
+  patient3: {
+    id: 'PAT-2026-00453',
+    name: 'Sarah Anderson (Hypothyroidism)',
+    condition: 'Primary Hypothyroidism',
+    caseId: 'case3',
+    caseText: 'Patient: 58-year-old female\nChief complaint: fatigue, weight gain, cold intolerance\n\nHistory: 6-month history of progressive fatigue, 8 kg weight gain, constipation,\ncold intolerance, and dry skin. No chest pain or dyspnea.\n\nMedications: atorvastatin 40 MG Oral, lisinopril 10 MG Oral\n\nExam: HR 58, BP 138/88, BMI 31. Skin dry, hair brittle, delayed reflexes.\nThyroid: diffusely enlarged, non-tender.\n\nLabs: TSH 18.4 mIU/L (elevated), Free T4 0.5 ng/dL (low), Total cholesterol 268 mg/dL',
+  },
+};
 
 export default function BasicAgentPage() {
   const [symptoms, setSymptoms] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState('');
+  const [showSnackbar, setShowSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [showHowItWorks, setShowHowItWorks] = useState(true);
+  const [showPatientMenu, setShowPatientMenu] = useState(false);
+
+  useEffect(() => {
+    if (showSnackbar) {
+      const timer = setTimeout(() => setShowSnackbar(false), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showSnackbar]);
 
   const handleAnalyze = async () => {
     if (!symptoms.trim()) {
@@ -30,7 +72,7 @@ export default function BasicAgentPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ patient_symptoms: symptoms }),
+        body: JSON.stringify({ text: symptoms }),
       });
 
       if (!response.ok) {
@@ -38,7 +80,18 @@ export default function BasicAgentPage() {
       }
 
       const data = await response.json();
-      setResult(data);
+      // Determine status from history (last CRITIC message)
+      const lastCritic = data.history.reverse().find((msg: string) => msg.includes('[CRITIC]'));
+      const isApproved = lastCritic?.includes('approved=True') || lastCritic?.includes('is_approved": true');
+      
+      setResult({
+        ...data,
+        status: isApproved ? 'approved' : 'in review'
+      });
+      
+      // Show snackbar
+      setSnackbarMessage(isApproved ? 'Summary approved!' : 'Summary in review');
+      setShowSnackbar(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to analyze symptoms');
     } finally {
@@ -50,11 +103,58 @@ export default function BasicAgentPage() {
     setSymptoms('');
     setResult(null);
     setError('');
+    setShowSnackbar(false);
+  };
+
+  const handleSelectPatient = (patient: Patient) => {
+    setSymptoms(patient.caseText);
+    setShowPatientMenu(false);
   };
 
   return (
     <div className="min-h-screen px-4 py-8 sm:px-6 lg:px-8 overflow-auto">
-      <div className="max-w-4xl mx-auto">
+      {/* Snackbar */}
+      {showSnackbar && (
+        <div className="fixed top-0 left-1/2 transform -translate-x-1/2 z-50 mt-4">
+          <div className={`px-6 py-3 rounded-lg shadow-lg text-white font-semibold flex items-center space-x-2 ${
+            snackbarMessage.includes('approved') 
+              ? 'bg-green-600' 
+              : 'bg-yellow-600'
+          }`}>
+            <CheckCircleIcon size={20} />
+            <span>{snackbarMessage}</span>
+          </div>
+        </div>
+      )}
+
+      {/* How It Works Snackbar */}
+      {showHowItWorks && (
+        <>
+          {/* Overlay Background */}
+          <div 
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40" 
+            onClick={() => setShowHowItWorks(false)}
+          />
+          {/* Centered Snackbar */}
+          <div 
+            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 cursor-pointer hover:shadow-2xl transition-all"
+            onClick={() => setShowHowItWorks(false)}
+          >
+            <div className="bg-blue-600 border border-blue-500 rounded-lg p-8 shadow-2xl max-w-md">
+              <h3 className="font-semibold text-white mb-4 text-lg">How This Works</h3>
+              <ol className="text-blue-100 text-sm space-y-3">
+                <li>1. <strong>Generator</strong> creates a medical summary from symptoms</li>
+                <li>2. <strong>Critic</strong> reviews it for safety and accuracy</li>
+                <li>3. If rejected, Generator refines the draft using feedback</li>
+                <li>4. Loop continues until summary is approved (max 5 iterations)</li>
+              </ol>
+              <p className="text-blue-200 text-xs mt-6 font-semibold text-center">Click anywhere to dismiss</p>
+            </div>
+          </div>
+        </>
+      )}
+
+      <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-12">
           <div className="inline-flex items-center space-x-3 bg-blue-500/10 border border-blue-500/20 rounded-lg px-4 py-2 mb-4">
@@ -70,141 +170,141 @@ export default function BasicAgentPage() {
           </p>
         </div>
 
-        {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Input Section */}
-          <div className="lg:col-span-1">
-            <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
-              <h2 className="text-xl font-bold text-white mb-4">Patient Symptoms</h2>
-
-              <div className="space-y-4">
-                <textarea
-                  value={symptoms}
-                  onChange={(e) => setSymptoms(e.target.value)}
-                  placeholder="Enter patient symptoms and medical history..."
-                  className="w-full h-40 bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none"
-                />
-
-                <div className="flex space-x-2">
-                  <button
-                    onClick={handleAnalyze}
-                    disabled={loading || !symptoms.trim()}
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-lg transition-all flex items-center justify-center space-x-2"
-                  >
-                    {loading ? (
-                      <>
-                        <Loader2Icon size={20} className="animate-spin" />
-                        <span>Analyzing...</span>
-                      </>
-                    ) : (
-                      <>
-                        <SendIcon size={20} />
-                        <span>Analyze</span>
-                      </>
-                    )}
-                  </button>
-                  <button
-                    onClick={handleReset}
-                    className="bg-slate-700 hover:bg-slate-600 text-white font-semibold py-3 px-4 rounded-lg transition-all"
-                  >
-                    Clear
-                  </button>
-                </div>
-
-                {/* Example */}
-                <div className="bg-slate-700 border border-slate-600 rounded-lg p-4">
-                  <p className="text-sm text-gray-300 font-semibold mb-2">Example:</p>
-                  <p className="text-sm text-gray-400">
-                    "45-year-old patient with chest pain, shortness of breath, and dizziness starting 2 days ago. History of hypertension."
-                  </p>
+        {/* Main Content - Vertical Layout */}
+        <div className="space-y-8">
+          {/* Error Message */}
+          {error && (
+            <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-6">
+              <div className="flex items-start space-x-4">
+                <AlertCircleIcon size={24} className="text-red-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h3 className="font-semibold text-red-300 mb-1">Error</h3>
+                  <p className="text-red-200">{error}</p>
                 </div>
               </div>
             </div>
+          )}
+
+          {/* 1. Patient Symptoms Section */}
+          <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold text-white">Patient Symptoms</h2>
+              <div className="flex space-x-2 relative">
+                {/* Select Patient Dropdown */}
+                <div className="relative">
+                  <button
+                    onClick={() => setShowPatientMenu(!showPatientMenu)}
+                    className="bg-slate-700 hover:bg-slate-600 text-white font-semibold py-2 px-6 rounded-lg transition-all flex items-center space-x-2"
+                  >
+                    <span>👤 Select Patient</span>
+                  </button>
+                  
+                  {showPatientMenu && (
+                    <>
+                      {/* Dropdown Overlay */}
+                      <div 
+                        className="fixed inset-0 z-40"
+                        onClick={() => setShowPatientMenu(false)}
+                      />
+                      {/* Dropdown Menu */}
+                      <div className="absolute right-0 mt-2 w-64 bg-slate-700 border border-slate-600 rounded-lg shadow-xl z-50">
+                        {Object.values(PATIENTS).map((patient) => (
+                          <button
+                            key={patient.id}
+                            onClick={() => handleSelectPatient(patient)}
+                            className="w-full text-left px-4 py-3 hover:bg-slate-600 first:rounded-t-lg last:rounded-b-lg transition-all border-b border-slate-600 last:border-b-0"
+                          >
+                            <p className="text-white font-semibold">{patient.name}</p>
+                            <p className="text-gray-400 text-sm">{patient.condition}</p>
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                <button
+                  onClick={handleAnalyze}
+                  disabled={loading || !symptoms.trim()}
+                  className="bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-semibold py-2 px-6 rounded-lg transition-all flex items-center space-x-2"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2Icon size={18} className="animate-spin" />
+                      <span>Analyzing...</span>
+                    </>
+                  ) : (
+                    <>
+                      <SendIcon size={18} />
+                      <span>Analyze</span>
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={handleReset}
+                  className="bg-slate-700 hover:bg-slate-600 text-white font-semibold py-2 px-6 rounded-lg transition-all"
+                >
+                  Clear
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <textarea
+                value={symptoms}
+                onChange={(e) => setSymptoms(e.target.value)}
+                placeholder="Enter patient symptoms and medical history..."
+                className="w-full h-80 bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none"
+              />
+            </div>
           </div>
 
-          {/* Output Section */}
-          <div className="lg:col-span-2">
-            {error && (
-              <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-6 mb-6">
-                <div className="flex items-start space-x-4">
-                  <AlertCircleIcon size={24} className="text-red-400 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <h3 className="font-semibold text-red-300 mb-1">Error</h3>
-                    <p className="text-red-200">{error}</p>
-                  </div>
+          {/* Loading State */}
+          {loading && (
+            <div className="bg-slate-800 border border-slate-700 rounded-lg p-12 text-center">
+              <Loader2Icon size={48} className="animate-spin text-blue-400 mx-auto mb-4" />
+              <p className="text-gray-400">
+                Running reflection loop...<br />
+                <span className="text-sm">Generating and critiquing summary</span>
+              </p>
+            </div>
+          )}
+
+          {/* 2. Generated Summary Section */}
+          {result && !loading && (
+            <>
+              <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-white mb-4">Generated Summary</h3>
+                <div className="bg-slate-700 border border-slate-600 rounded-lg p-4">
+                  <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">{result.final_summary}</p>
                 </div>
               </div>
-            )}
 
-            {loading && (
-              <div className="bg-slate-800 border border-slate-700 rounded-lg p-12 text-center">
-                <Loader2Icon size={48} className="animate-spin text-blue-400 mx-auto mb-4" />
-                <p className="text-gray-400">
-                  Running reflection loop...<br />
-                  <span className="text-sm">Generating and critiquing summary</span>
-                </p>
-              </div>
-            )}
-
-            {result && !loading && (
-              <div className="space-y-6">
-                {/* Status */}
-                <div className={`border rounded-lg p-6 ${result.status === 'approved' ? 'bg-green-500/10 border-green-500/30' : 'bg-yellow-500/10 border-yellow-500/30'}`}>
-                  <div className="flex items-center space-x-3">
-                    <CheckCircleIcon size={24} className={result.status === 'approved' ? 'text-green-400' : 'text-yellow-400'} />
-                    <div>
-                      <p className="font-semibold text-white capitalize">{result.status}</p>
-                      {result.iterations && (
-                        <p className={`text-sm ${result.status === 'approved' ? 'text-green-300' : 'text-yellow-300'}`}>
-                          Completed in {result.iterations} iteration{result.iterations !== 1 ? 's' : ''}
-                        </p>
-                      )}
-                    </div>
+              {/* 3. Agent Thinking History Section */}
+              {result.history && result.history.length > 0 && (
+                <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
+                  <h3 className="text-lg font-semibold text-white mb-4">Agent Thinking History</h3>
+                  <div className="bg-slate-700 border border-slate-600 rounded-lg p-4 space-y-2 max-h-80 overflow-y-auto">
+                    {result.history.map((msg, idx) => (
+                      <p key={idx} className="text-gray-300 text-sm font-mono">{msg}</p>
+                    ))}
                   </div>
                 </div>
+              )}
+            </>
+          )}
 
-                {/* Generated Summary */}
-                <div>
-                  <h3 className="text-lg font-semibold text-white mb-3">Generated Summary</h3>
-                  <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
-                    <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">{result.draft}</p>
-                  </div>
-                </div>
-
-                {/* Feedback */}
-                {result.feedback && (
-                  <div>
-                    <h3 className="text-lg font-semibold text-white mb-3">Critic Feedback</h3>
-                    <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
-                      <p className="text-gray-300 leading-relaxed">{result.feedback}</p>
-                    </div>
-                  </div>
-                )}
-
-                {/* How It Works */}
-                <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-6">
-                  <h3 className="font-semibold text-blue-300 mb-3">How This Works</h3>
-                  <ol className="text-blue-200 text-sm space-y-2">
-                    <li>1. <strong>Generator</strong> creates a medical summary from symptoms</li>
-                    <li>2. <strong>Critic</strong> reviews it for safety and accuracy</li>
-                    <li>3. If rejected, Generator refines the draft using feedback</li>
-                    <li>4. Loop continues until summary is approved (max 5 iterations)</li>
-                  </ol>
-                </div>
+          {/* Empty State */}
+          {!result && !loading && !error && (
+            <div className="bg-slate-800 border border-slate-700 rounded-lg p-12 text-center">
+              <div className="w-16 h-16 bg-blue-500/20 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <span className="text-3xl">📋</span>
               </div>
-            )}
-
-            {!result && !loading && !error && (
-              <div className="bg-slate-800 border border-slate-700 rounded-lg p-12 text-center">
-                <div className="w-16 h-16 bg-blue-500/20 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <span className="text-3xl">📋</span>
-                </div>
-                <p className="text-gray-400">
-                  Enter patient symptoms to generate a medical summary with AI validation.
-                </p>
-              </div>
-            )}
-          </div>
+              <p className="text-gray-400">
+                Enter patient symptoms to generate a medical summary with AI validation.
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>

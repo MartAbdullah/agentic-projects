@@ -43,10 +43,10 @@ export default function HomePage() {
             <p className="text-gray-400 text-lg">Choose your learning path</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 auto-rows-max">
             {agents.map((agent) => (
               <Link key={agent.id} to={agent.link}>
-                <div className="h-full bg-slate-800 border border-slate-700 rounded-2xl p-8 hover:border-purple-500 transition-all group cursor-pointer hover:shadow-xl hover:shadow-purple-500/20">
+                <div className="min-h-96 bg-slate-800 border border-slate-700 rounded-2xl p-8 hover:border-purple-500 transition-all group cursor-pointer hover:shadow-xl hover:shadow-purple-500/20 flex flex-col justify-between">
                   {/* Header */}
                   <div className="flex items-start justify-between mb-4">
                     <div className={`text-4xl bg-gradient-to-br ${agent.color} bg-clip-text text-transparent`}>

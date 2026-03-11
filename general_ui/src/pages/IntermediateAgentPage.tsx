@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { SendIcon, Loader2Icon, UsersIcon } from '../icons';
+import { SendIcon, Loader2Icon, UsersIcon, AlertCircleIcon, CheckCircleIcon } from '../icons';
 
 interface SpecialistAnalysis {
   specialist: string;
@@ -12,6 +12,42 @@ interface AnalysisResult {
   unified_summary: string;
   specialists_count: number;
 }
+
+interface IntermediateAgentPageProps {
+  specialistsCount: number;
+}
+
+interface Patient {
+  id: string;
+  name: string;
+  condition: string;
+  caseId: string;
+  caseText: string;
+}
+
+const PATIENTS: Record<string, Patient> = {
+  patient1: {
+    id: 'PAT-2026-00451',
+    name: 'James Wilson (Acute Meningitis)',
+    condition: 'Acute Meningitis',
+    caseId: 'case1',
+    caseText: 'Patient is a 45-year-old male with a 3-day history of:\n- Severe headache (9/10 intensity), photophobia, neck stiffness\n- Nausea and one episode of vomiting\n- Temperature 38.7°C, HR 94\n- CBC: WBC 14,200 (elevated), neutrophils 85%\n- CSF: cloudy, protein elevated, glucose low',
+  },
+  patient2: {
+    id: 'PAT-2026-00452',
+    name: 'Margaret Thompson (Heart Failure)',
+    condition: 'Decompensated Heart Failure',
+    caseId: 'case2',
+    caseText: '68-year-old female with a 2-week history of progressive shortness of breath,\nbilateral leg swelling, and orthopnea. She reports a 5 kg weight gain over\nthe past month. Past medical history: hypertension, type 2 diabetes.\nMedications: metformin, amlodipine. Exam: JVP elevated, bilateral crackles,\npitting edema to knees. ECG: sinus tachycardia, LBBB.\nBNP: 1,450 pg/mL (elevated). CXR: cardiomegaly, pulmonary congestion.',
+  },
+  patient3: {
+    id: 'PAT-2026-00453',
+    name: 'Sarah Anderson (Hypothyroidism)',
+    condition: 'Primary Hypothyroidism',
+    caseId: 'case3',
+    caseText: 'Patient: 58-year-old female\nChief complaint: fatigue, weight gain, cold intolerance\n\nHistory: 6-month history of progressive fatigue, 8 kg weight gain, constipation,\ncold intolerance, and dry skin. No chest pain or dyspnea.\n\nMedications: atorvastatin 40 MG Oral, lisinopril 10 MG Oral\n\nExam: HR 58, BP 138/88, BMI 31. Skin dry, hair brittle, delayed reflexes.\nThyroid: diffusely enlarged, non-tender.\n\nLabs: TSH 18.4 mIU/L (elevated), Free T4 0.5 ng/dL (low), Total cholesterol 268 mg/dL',
+  },
+};
 
 // Specialist Database with Descriptions
 const SPECIALIST_DATABASE: Record<string, { fullName: string; description: string; emoji: string; color: string }> = {
@@ -27,14 +63,15 @@ const SPECIALIST_DATABASE: Record<string, { fullName: string; description: strin
   'Radiologist': { fullName: 'Dr. Emma Thompson', description: 'Medical Imaging & Diagnostics Expert', emoji: '🖼️', color: 'from-slate-500 to-slate-600' },
 };
 
-export default function IntermediateAgentPage() {
+export default function IntermediateAgentPage({ specialistsCount }: IntermediateAgentPageProps) {
   const [medicalCase, setMedicalCase] = useState('');
-  const [specialistsCount, setSpecialistsCount] = useState(3);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState<string | null>(null);
   const [popupSpec, setPopupSpec] = useState<string | null>(null);
+  const [showHowItWorks, setShowHowItWorks] = useState(true);
+  const [showPatientMenu, setShowPatientMenu] = useState(false);
 
   // Auto-hide snackbar after 5 seconds
   useEffect(() => {
@@ -90,101 +127,145 @@ export default function IntermediateAgentPage() {
     setResult(null);
     setError('');
     setActiveTab(null);
-    setSpecialistsCount(3);
+  };
+
+  const handleSelectPatient = (patient: Patient) => {
+    setMedicalCase(patient.caseText);
+    setShowPatientMenu(false);
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 px-4 py-12 sm:px-6 lg:px-8 overflow-auto">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-16">
-          <div className="inline-flex items-center space-x-3 bg-purple-500/20 border border-purple-500/40 rounded-full px-6 py-3 mb-6 backdrop-blur-sm">
-            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center">
-              <span className="text-white font-bold">02</span>
+      {/* How It Works Snackbar */}
+      {showHowItWorks && (
+        <>
+          {/* Overlay Background */}
+          <div 
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40" 
+            onClick={() => setShowHowItWorks(false)}
+          />
+          {/* Centered Snackbar */}
+          <div 
+            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 cursor-pointer hover:shadow-2xl transition-all"
+            onClick={() => setShowHowItWorks(false)}
+          >
+            <div className="bg-purple-600 border border-purple-500 rounded-lg p-8 shadow-2xl max-w-md">
+              <h3 className="font-semibold text-white mb-4 text-lg">How This Works</h3>
+              <ol className="text-purple-100 text-sm space-y-3">
+                <li>1. <strong>Input</strong> a patient case description</li>
+                <li>2. <strong>AI routes</strong> case to relevant specialists</li>
+                <li>3. <strong>Each specialist</strong> analyzes from their perspective</li>
+                <li>4. <strong>Unified assessment</strong> combines all expert insights</li>
+              </ol>
+              <p className="text-purple-200 text-xs mt-6 font-semibold text-center">Click anywhere to dismiss</p>
             </div>
-            <span className="text-purple-200 font-semibold text-sm">Multi-Specialist Agent</span>
           </div>
+        </>
+      )}
 
-          <h1 className="text-5xl font-bold text-white mb-4 leading-tight">Medical Case Analysis</h1>
-          <p className="text-gray-300 text-lg max-w-2xl">
-            Enter a patient case and let AI specialists analyze it in parallel. Get comprehensive, multi-perspective medical insights.
-          </p>
-        </div>
-
-        {/* Main Content - Full Width Stacked Layout */}
-        <div className="space-y-8">
-          {/* Patient Case - Full Width Top */}
-          <div className="bg-gradient-to-br from-slate-800 to-slate-800/50 border border-slate-700/50 rounded-2xl p-8 backdrop-blur-sm shadow-2xl">
-            <label className="block text-white font-bold mb-4 text-lg">Patient Case</label>
-            <textarea
-              value={medicalCase}
-              onChange={(e) => setMedicalCase(e.target.value)}
-              placeholder="68-year-old female with shortness of breath, bilateral leg swelling, and weight gain. PMH: hypertension, type 2 diabetes..."
-              className="w-full h-32 bg-slate-700/50 border border-slate-600/50 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/60 focus:ring-2 focus:ring-purple-500/30 resize-none transition-all backdrop-blur-sm"
-            />
-          </div>
-
-          {/* Controls - Patient Case Config */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Specialists Slider */}
-            <div className="lg:col-span-2 bg-gradient-to-br from-slate-800 to-slate-800/50 border border-slate-700/50 rounded-2xl p-8 backdrop-blur-sm shadow-2xl">
-              <div className="flex items-center justify-between mb-4">
-                <label className="text-white font-bold text-lg">Specialists to Consult</label>
-                <span className="text-3xl font-bold text-purple-400">{specialistsCount}</span>
+      <div className="flex h-screen gap-8">
+        {/* Right Content Area - Main Content (Full Width) */}
+        <div className="flex-1 pt-12 pr-8 overflow-y-auto">
+          {/* Header */}
+          <div className="mb-16">
+            <div className="inline-flex items-center space-x-3 bg-purple-500/20 border border-purple-500/40 rounded-full px-6 py-3 mb-6 backdrop-blur-sm">
+              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center">
+                <span className="text-white font-bold">02</span>
               </div>
-              <div className="relative">
-                <input
-                  type="range"
-                  min="1"
-                  max="20"
-                  value={specialistsCount}
-                  onChange={(e) => setSpecialistsCount(parseInt(e.target.value))}
-                  className="w-full h-2 bg-slate-700 rounded-full appearance-none cursor-pointer accent-purple-500"
-                />
-              </div>
-              <p className="text-xs text-gray-400 mt-3 text-center">
-                1 = Single specialist • {specialistsCount} = Current • 20 = Maximum coverage
-              </p>
+              <span className="text-purple-200 font-semibold text-sm">Multi-Specialist Agent</span>
             </div>
 
-            {/* Buttons */}
-            <div className="flex flex-col gap-3 justify-end">
-              <button
-                onClick={handleAnalyze}
-                disabled={loading || !medicalCase.trim()}
-                className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 disabled:from-slate-600 disabled:to-slate-600 disabled:cursor-not-allowed text-white font-bold py-4 px-4 rounded-xl transition-all transform hover:scale-105 active:scale-95 flex items-center justify-center space-x-2 shadow-lg"
-              >
-                {loading ? (
-                  <>
-                    <Loader2Icon size={20} className="animate-spin" />
-                    <span>Analyzing...</span>
-                  </>
-                ) : (
-                  <>
-                    <SendIcon size={20} />
-                    <span>Analyze</span>
-                  </>
-                )}
-              </button>
-              <button
-                onClick={handleReset}
-                className="w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-4 px-4 rounded-xl transition-all"
-              >
-                Reset
-              </button>
+            <h1 className="text-5xl font-bold text-white mb-4 leading-tight">Medical Case Analysis</h1>
+            <p className="text-gray-300 text-lg max-w-2xl">
+              Enter a patient case and let AI specialists analyze it in parallel. Get comprehensive, multi-perspective medical insights.
+            </p>
+          </div>
+
+          {/* Patient Case Card */}
+          <div className="bg-gradient-to-br from-slate-800 to-slate-800/50 border border-slate-700/50 rounded-2xl p-8 backdrop-blur-sm shadow-2xl mb-8">
+            <div className="flex justify-between items-center mb-6">
+              <label className="text-white font-bold text-lg">Patient Case</label>
+              <div className="flex space-x-2 relative">
+                {/* Select Patient Dropdown */}
+                <div className="relative">
+                  <button
+                    onClick={() => setShowPatientMenu(!showPatientMenu)}
+                    className="bg-slate-700 hover:bg-slate-600 text-white font-semibold py-2 px-6 rounded-xl transition-all flex items-center space-x-2"
+                  >
+                    <span>👤 Select Patient</span>
+                  </button>
+                  
+                  {showPatientMenu && (
+                    <>
+                      {/* Dropdown Overlay */}
+                      <div 
+                        className="fixed inset-0 z-40"
+                        onClick={() => setShowPatientMenu(false)}
+                      />
+                      {/* Dropdown Menu */}
+                      <div className="absolute right-0 mt-2 w-64 bg-slate-700 border border-slate-600 rounded-lg shadow-xl z-50">
+                        {Object.values(PATIENTS).map((patient) => (
+                          <button
+                            key={patient.id}
+                            onClick={() => handleSelectPatient(patient)}
+                            className="w-full text-left px-4 py-3 hover:bg-slate-600 first:rounded-t-lg last:rounded-b-lg transition-all border-b border-slate-600 last:border-b-0"
+                          >
+                            <p className="text-white font-semibold">{patient.name}</p>
+                            <p className="text-gray-400 text-sm">{patient.condition}</p>
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                <button
+                  onClick={handleAnalyze}
+                  disabled={loading || !medicalCase.trim()}
+                  className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 disabled:from-slate-600 disabled:to-slate-600 disabled:cursor-not-allowed text-white font-bold py-2 px-6 rounded-xl transition-all transform hover:scale-105 active:scale-95 flex items-center space-x-2 shadow-lg"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2Icon size={18} className="animate-spin" />
+                      <span>Analyzing...</span>
+                    </>
+                  ) : (
+                    <>
+                      <SendIcon size={18} />
+                      <span>Analyze</span>
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={handleReset}
+                  className="bg-slate-700 hover:bg-slate-600 text-white font-bold py-2 px-6 rounded-xl transition-all"
+                >
+                  Reset
+                </button>
+              </div>
+            </div>
+            
+            <div>
+              <textarea
+                value={medicalCase}
+                onChange={(e) => setMedicalCase(e.target.value)}
+                placeholder="68-year-old female with shortness of breath, bilateral leg swelling, and weight gain. PMH: hypertension, type 2 diabetes..."
+                className="w-full h-64 bg-slate-700/50 border border-slate-600/50 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/60 focus:ring-2 focus:ring-purple-500/30 resize-none transition-all backdrop-blur-sm"
+              />
             </div>
           </div>
 
-          {/* Results Section - Full Width Below */}
-          {loading && (
-            <div className="bg-gradient-to-br from-slate-800 to-slate-800/50 border border-slate-700/50 rounded-2xl p-16 text-center backdrop-blur-sm">
-              <Loader2Icon size={64} className="animate-spin text-purple-400 mx-auto mb-6" />
-              <p className="text-gray-300 text-xl font-semibold">
-                Analyzing case with {specialistsCount} specialist{specialistsCount !== 1 ? 's' : ''}...
-              </p>
-              <p className="text-gray-400 text-sm mt-3">Running specialist analyses in parallel</p>
-            </div>
-          )}
+          {/* Results Section */}
+          <div className="space-y-8">
+            {loading && (
+              <div className="bg-gradient-to-br from-slate-800 to-slate-800/50 border border-slate-700/50 rounded-2xl p-16 text-center backdrop-blur-sm">
+                <Loader2Icon size={64} className="animate-spin text-purple-400 mx-auto mb-6" />
+                <p className="text-gray-300 text-xl font-semibold">
+                  Analyzing case with {specialistsCount} specialist{specialistsCount !== 1 ? 's' : ''}...
+                </p>
+                <p className="text-gray-400 text-sm mt-3">Running specialist analyses in parallel</p>
+              </div>
+            )}
 
           {result && !loading && (
             <div className="space-y-8">
@@ -284,6 +365,7 @@ export default function IntermediateAgentPage() {
               </p>
             </div>
           )}
+          </div>
         </div>
       </div>
 

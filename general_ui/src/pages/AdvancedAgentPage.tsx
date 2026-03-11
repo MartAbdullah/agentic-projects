@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { UploadIcon, Loader2Icon, Edit2Icon, CheckIcon, XIcon, FileTextIcon } from '../icons';
+import { UploadIcon, Loader2Icon, Edit2Icon, CheckIcon, XIcon, FileTextIcon, CheckCircleIcon } from '../icons';
 import Footer from '../components/Footer';
 
 interface ExtractionResult {
@@ -16,6 +16,38 @@ interface ProcessingState {
   extractions: ExtractionResult | null;
 }
 
+interface Patient {
+  id: string;
+  name: string;
+  condition: string;
+  caseId: string;
+  caseText: string;
+}
+
+const PATIENTS: Record<string, Patient> = {
+  patient1: {
+    id: 'PAT-2026-00451',
+    name: 'James Wilson (Acute Meningitis)',
+    condition: 'Acute Meningitis',
+    caseId: 'case1',
+    caseText: 'Patient is a 45-year-old male with a 3-day history of:\n- Severe headache (9/10 intensity), photophobia, neck stiffness\n- Nausea and one episode of vomiting\n- Temperature 38.7°C, HR 94\n- CBC: WBC 14,200 (elevated), neutrophils 85%\n- CSF: cloudy, protein elevated, glucose low',
+  },
+  patient2: {
+    id: 'PAT-2026-00452',
+    name: 'Margaret Thompson (Heart Failure)',
+    condition: 'Decompensated Heart Failure',
+    caseId: 'case2',
+    caseText: '68-year-old female with a 2-week history of progressive shortness of breath,\nbilateral leg swelling, and orthopnea. She reports a 5 kg weight gain over\nthe past month. Past medical history: hypertension, type 2 diabetes.\nMedications: metformin, amlodipine. Exam: JVP elevated, bilateral crackles,\npitting edema to knees. ECG: sinus tachycardia, LBBB.\nBNP: 1,450 pg/mL (elevated). CXR: cardiomegaly, pulmonary congestion.',
+  },
+  patient3: {
+    id: 'PAT-2026-00453',
+    name: 'Sarah Anderson (Hypothyroidism)',
+    condition: 'Primary Hypothyroidism',
+    caseId: 'case3',
+    caseText: 'Patient: 58-year-old female\nChief complaint: fatigue, weight gain, cold intolerance\n\nHistory: 6-month history of progressive fatigue, 8 kg weight gain, constipation,\ncold intolerance, and dry skin. No chest pain or dyspnea.\n\nMedications: atorvastatin 40 MG Oral, lisinopril 10 MG Oral\n\nExam: HR 58, BP 138/88, BMI 31. Skin dry, hair brittle, delayed reflexes.\nThyroid: diffusely enlarged, non-tender.\n\nLabs: TSH 18.4 mIU/L (elevated), Free T4 0.5 ng/dL (low), Total cholesterol 268 mg/dL',
+  },
+};
+
 export default function AdvancedAgentPage() {
   const [files, setFiles] = useState<File[]>([]);
   const [storageFiles, setStorageFiles] = useState<string[]>([]);
@@ -30,6 +62,8 @@ export default function AdvancedAgentPage() {
   const [editedSoap, setEditedSoap] = useState('');
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState<'upload' | 'storage'>('upload');
+  const [showHowItWorks, setShowHowItWorks] = useState(true);
+  const [showPatientMenu, setShowPatientMenu] = useState(false);
 
   // Load storage files on mount
   useEffect(() => {
@@ -189,8 +223,41 @@ export default function AdvancedAgentPage() {
     setSelectedStorageFiles([]);
   };
 
+  const handleSelectPatient = (patient: Patient) => {
+    // For Advanced Agent, we'll create a text file for processing
+    const patientFile = new File([patient.caseText], `${patient.name}.txt`, { type: 'text/plain' });
+    setFiles([patientFile]);
+    setShowPatientMenu(false);
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
+      {/* How It Works Snackbar */}
+      {showHowItWorks && (
+        <>
+          {/* Overlay Background */}
+          <div 
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40" 
+            onClick={() => setShowHowItWorks(false)}
+          />
+          {/* Centered Snackbar */}
+          <div 
+            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 cursor-pointer hover:shadow-2xl transition-all"
+            onClick={() => setShowHowItWorks(false)}
+          >
+            <div className="bg-orange-600 border border-orange-500 rounded-lg p-8 shadow-2xl max-w-md">
+              <h3 className="font-semibold text-white mb-4 text-lg">How This Works</h3>
+              <ol className="text-orange-100 text-sm space-y-3">
+                <li>1. <strong>Upload</strong> clinical documents (PDFs, images, text)</li>
+                <li>2. <strong>Extract</strong> medical entities and conditions automatically</li>
+                <li>3. <strong>Assign</strong> clinical codes to extracted entities</li>
+                <li>4. <strong>Draft</strong> SOAP notes with human review and approval</li>
+              </ol>
+              <p className="text-orange-200 text-xs mt-6 font-semibold text-center">Click anywhere to dismiss</p>
+            </div>
+          </div>
+        </>
+      )}
       <div className="flex-1 px-4 py-8 sm:px-6 lg:px-8 overflow-auto">
         <div className="max-w-6xl mx-auto">
         {/* Header */}
@@ -208,42 +275,77 @@ export default function AdvancedAgentPage() {
           </p>
         </div>
 
-        {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Input Section */}
-          <div className="lg:col-span-1">
-          {/* Tabs */}
-          <div className="flex space-x-2 bg-slate-700 p-1 rounded-lg">
+        {/* Main Content - Vertical Stack */}
+        <div className="space-y-8">
+          {/* Upload Section - Full Width Top */}
+          <div className="bg-gradient-to-br from-slate-800 to-slate-800/50 border border-slate-700/50 rounded-2xl p-8 backdrop-blur-sm shadow-2xl">
+            {/* Header with Title and Tabs */}
+            <div className="flex justify-between items-center mb-8">
+              <h2 className="text-xl font-bold text-white">Upload Documents</h2>
+              <div className="flex space-x-2">
+                {/* Select Patient Dropdown */}
+                <div className="relative">
+                  <button
+                    onClick={() => setShowPatientMenu(!showPatientMenu)}
+                    className="bg-slate-700 hover:bg-slate-600 text-white font-semibold py-2 px-6 rounded-lg transition-all flex items-center space-x-2"
+                  >
+                    <span>👤 Select Patient</span>
+                  </button>
+                  
+                  {showPatientMenu && (
+                    <>
+                      {/* Dropdown Overlay */}
+                      <div 
+                        className="fixed inset-0 z-40"
+                        onClick={() => setShowPatientMenu(false)}
+                      />
+                      {/* Dropdown Menu */}
+                      <div className="absolute right-0 mt-2 w-64 bg-slate-700 border border-slate-600 rounded-lg shadow-xl z-50">
+                        {Object.values(PATIENTS).map((patient) => (
+                          <button
+                            key={patient.id}
+                            onClick={() => handleSelectPatient(patient)}
+                            className="w-full text-left px-4 py-3 hover:bg-slate-600 first:rounded-t-lg last:rounded-b-lg transition-all border-b border-slate-600 last:border-b-0"
+                          >
+                            <p className="text-white font-semibold">{patient.name}</p>
+                            <p className="text-gray-400 text-sm">{patient.condition}</p>
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                <div className="flex space-x-2 bg-slate-700 p-1 rounded-lg">
+                  <button
+                    onClick={() => setActiveTab('upload')}
+                    className={`py-2 px-4 rounded font-medium text-sm transition-all ${
+                      activeTab === 'upload'
+                        ? 'bg-orange-500 text-white'
+                        : 'text-gray-300 hover:text-white'
+                    }`}
+                  >
+                    Upload Files
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('storage')}
+                    className={`py-2 px-4 rounded font-medium text-sm transition-all ${
+                      activeTab === 'storage'
+                        ? 'bg-orange-500 text-white'
+                        : 'text-gray-300 hover:text-white'
+                    }`}
+                  >
+                    From Storage
+                  </button>
+                </div>
+              </div>
+            </div>
+
               {processingState.status === 'idle' ? (
                 <div className="space-y-6">
-                  {/* Tabs */}
-                  <div className="flex space-x-2 bg-slate-700 p-1 rounded-lg">
-                    <button
-                      onClick={() => setActiveTab('upload')}
-                      className={`flex-1 py-2 px-3 rounded font-medium text-sm transition-all ${
-                        activeTab === 'upload'
-                          ? 'bg-orange-500 text-white'
-                          : 'text-gray-300 hover:text-white'
-                      }`}
-                    >
-                      Upload Files
-                    </button>
-                    <button
-                      onClick={() => setActiveTab('storage')}
-                      className={`flex-1 py-2 px-3 rounded font-medium text-sm transition-all ${
-                        activeTab === 'storage'
-                          ? 'bg-orange-500 text-white'
-                          : 'text-gray-300 hover:text-white'
-                      }`}
-                    >
-                      From Storage
-                    </button>
-                  </div>
-
                   {/* Upload Tab */}
                   {activeTab === 'upload' && (
                     <div>
-                      <h2 className="text-xl font-bold text-white mb-4">Upload Documents</h2>
                       <div className="border-2 border-dashed border-slate-600 rounded-lg p-8 text-center hover:border-orange-500 transition-colors cursor-pointer">
                         <label className="cursor-pointer">
                           <div className="flex flex-col items-center space-y-2">
@@ -296,7 +398,7 @@ export default function AdvancedAgentPage() {
                   {/* Storage Tab */}
                   {activeTab === 'storage' && (
                     <div>
-                      <h2 className="text-xl font-bold text-white mb-4">Select from Storage</h2>
+                      <p className="text-white font-semibold mb-4">Select from Storage</p>
                       {storageFiles.length > 0 ? (
                         <div className="space-y-2 max-h-64 overflow-y-auto">
                           {storageFiles.map((file) => (
@@ -361,8 +463,8 @@ export default function AdvancedAgentPage() {
             </div>
           </div>
 
-          {/* Output Section */}
-          <div className="lg:col-span-2">
+          {/* Output Section - Full Width Below */}
+          <div className="bg-gradient-to-br from-slate-800 to-slate-800/50 border border-slate-700/50 rounded-2xl p-8 backdrop-blur-sm shadow-2xl">
             {error && (
               <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-6 mb-6">
                 <h3 className="font-semibold text-red-300 mb-1">Error</h3>
@@ -497,7 +599,6 @@ export default function AdvancedAgentPage() {
             </div>
           </div>
         )}
-      </div>
       </div>
 
       {/* Footer */}

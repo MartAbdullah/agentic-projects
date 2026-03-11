@@ -82,8 +82,8 @@ requests>=2.31.0
 ## Environment File (`.env`)
 
 ```env
-OPENAI_API_KEY=sk-...
-LLM_MODEL=gpt-4o-mini
+GEMINI_API_KEY=sk-...
+LLM_MODEL=gemini/gemini-2.5-flash
 ```
 
 ---
