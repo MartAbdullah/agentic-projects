@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional
 from agent import app as agent_graph
@@ -10,21 +11,31 @@ app = FastAPI(
     version="1.0.0"
 )
 
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "http://localhost:8501", "*"],
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"],
+    allow_headers=["*"],
+)
+
 
 class AnalyzeRequest(BaseModel):
-    text: str
+    case: str
     top_k: int = 5
 
 
-class AssessmentItem(BaseModel):
-    role: str
-    specialist_key: str
+class SpecialistAssessment(BaseModel):
+    specialist: str
     assessment: str
 
 
 class AnalyzeResponse(BaseModel):
-    assessments: List[AssessmentItem]
-    final_summary: str
+    case_summary: str
+    specialist_assessments: List[SpecialistAssessment]
+    unified_summary: str
+    specialists_count: int
 
 
 @app.get("/health")
@@ -39,7 +50,7 @@ async def analyze(request: AnalyzeRequest):
     Analyze medical case with multiple specialists.
     
     Args:
-        text: Medical case description
+        case: Medical case description
         top_k: Number of specialists to consult (1-20, default 5)
     
     Returns:
@@ -49,13 +60,13 @@ async def analyze(request: AnalyzeRequest):
     if not (1 <= request.top_k <= 20):
         raise HTTPException(status_code=400, detail="top_k must be between 1 and 20")
     
-    if not request.text or len(request.text.strip()) == 0:
-        raise HTTPException(status_code=400, detail="text cannot be empty")
+    if not request.case or len(request.case.strip()) == 0:
+        raise HTTPException(status_code=400, detail="case cannot be empty")
     
     try:
         # Initialize state
         initial_state = {
-            "case_description": request.text,
+            "case_description": request.case,
             "top_k": request.top_k,
             "specialist_key": "",
             "specialists_to_run": [],
@@ -66,19 +77,23 @@ async def analyze(request: AnalyzeRequest):
         # Run the agent graph
         result = agent_graph.invoke(initial_state)
         
-        # Format response
-        assessments = [
-            AssessmentItem(
-                role=a["role"],
-                specialist_key=a.get("specialist_key", ""),
+        # Format assessments: convert from "role" to "specialist" field
+        specialist_assessments = [
+            SpecialistAssessment(
+                specialist=a["role"],
                 assessment=a["assessment"]
             )
             for a in result["assessments"]
         ]
         
+        # Create case summary from first 500 chars of case
+        case_summary = request.case[:500] + ("..." if len(request.case) > 500 else "")
+        
         return AnalyzeResponse(
-            assessments=assessments,
-            final_summary=result["final_summary"]
+            case_summary=case_summary,
+            specialist_assessments=specialist_assessments,
+            unified_summary=result["final_summary"],
+            specialists_count=len(specialist_assessments)
         )
         
     except Exception as e:
@@ -89,4 +104,4 @@ async def analyze(request: AnalyzeRequest):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)    
+    uvicorn.run(app, host="0.0.0.0", port=8000)

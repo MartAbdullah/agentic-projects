@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { HomeIcon, ZapIcon, BrainIcon, DatabaseIcon, StethoscopeIcon, UserIcon } from '../icons';
+import logoImg from '../icons/logo2.png';
 
 export default function Sidebar() {
   const location = useLocation();
@@ -11,27 +12,27 @@ export default function Sidebar() {
       icon: HomeIcon,
     },
     {
-      name: 'Basic Agent',
-      href: '/basic-agent',
+      name: 'Patient Intake',
+      href: '/patient-intake',
       icon: ZapIcon,
     },
     {
-      name: 'Intermediate Agent',
-      href: '/intermediate-agent',
+      name: 'Specialist Consultation',
+      href: '/specialist-consultation',
       icon: BrainIcon,
     },
     {
-      name: 'Advanced Agent',
-      href: '/advanced-agent',
+      name: 'Clinical Document',
+      href: '/clinical-document',
       icon: DatabaseIcon,
     },
     {
-      name: 'Specialist',
+      name: 'Specialist Portal',
       href: '/specialist',
       icon: StethoscopeIcon,
     },
     {
-      name: 'Patient',
+      name: 'Patient Portal',
       href: '/patient',
       icon: UserIcon,
     },
@@ -42,14 +43,14 @@ export default function Sidebar() {
   return (
     <aside className="w-64 bg-slate-800 border-r border-slate-700 flex flex-col h-screen overflow-y-auto">
       {/* Logo Section */}
-      <div className="p-6 border-b border-slate-700">
-        <Link to="/" className="flex items-center space-x-3 group">
-          <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-pink-600 rounded-lg flex items-center justify-center group-hover:shadow-lg group-hover:shadow-purple-500/50 transition-all">
-            <span className="text-white font-bold text-lg">A</span>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-white font-bold text-sm">Gezondheid</span>
-            <span className="text-gray-400 text-xs">Agentic Ai</span>
+      <div className="p-2 border-b border-slate-700">
+        <Link to="/" className="flex flex-col items-center group">
+          <div className="w-full bg-transparent rounded-lg flex items-center justify-center group-hover:shadow-lg group-hover:shadow-green-500/50 transition-all overflow-hidden px-1 py-0 mb-1">
+            <img 
+              src={logoImg}
+              alt="Healthcare Logo"
+              className="w-64 h-auto object-contain"
+            />
           </div>
         </Link>
       </div>
@@ -87,7 +88,7 @@ export default function Sidebar() {
           </div>
         </div>
         <p className="text-xs text-gray-500 text-center">
-          © 2026 Agentic Suite. Medical AI Platform.
+          © 2026 HealthCare. Medical AI Platform.
         </p>
       </div>
     </aside>

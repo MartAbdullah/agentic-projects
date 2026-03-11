@@ -6,27 +6,27 @@ export default function HomePage() {
   const agents = [
     {
       id: 1,
-      title: 'Basic Agent',
+      title: 'Patient Intake',
       description: 'A simple agent that demonstrates fundamental agentic patterns. Perfect for learning the basics.',
-      link: '/basic-agent',
+      link: '/patient-intake',
       color: 'from-blue-400 to-cyan-600',
       icon: '⚡',
       complexity: 'Beginner',
     },
     {
       id: 2,
-      title: 'Intermediate Agent',
+      title: 'Specialist Consultation',
       description: 'A more advanced agent with state management, memory, and conditional logic.',
-      link: '/intermediate-agent',
+      link: '/specialist-consultation',
       color: 'from-purple-400 to-pink-600',
       icon: '🧠',
       complexity: 'Intermediate',
     },
     {
       id: 3,
-      title: 'Advanced Agent',
+      title: 'Clinical Document',
       description: 'A production-ready clinical document processing pipeline with human-in-the-loop review.',
-      link: '/advanced-agent',
+      link: '/clinical-document',
       color: 'from-orange-400 to-red-600',
       icon: '🏥',
       complexity: 'Advanced',
@@ -39,14 +39,14 @@ export default function HomePage() {
       <section className="px-4 py-12 sm:px-6 lg:px-8 flex-1">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-white mb-4">Agent Implementations</h2>
+            <h2 className="text-4xl font-bold text-white mb-4">Welcome HealthCare Center</h2>
             <p className="text-gray-400 text-lg">Choose your learning path</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {agents.map((agent) => (
               <Link key={agent.id} to={agent.link}>
-                <div className="h-full bg-slate-800 border border-slate-700 rounded-lg p-8 hover:border-purple-500 transition-all group cursor-pointer hover:shadow-xl hover:shadow-purple-500/20">
+                <div className="h-full bg-slate-800 border border-slate-700 rounded-2xl p-8 hover:border-purple-500 transition-all group cursor-pointer hover:shadow-xl hover:shadow-purple-500/20">
                   {/* Header */}
                   <div className="flex items-start justify-between mb-4">
                     <div className={`text-4xl bg-gradient-to-br ${agent.color} bg-clip-text text-transparent`}>

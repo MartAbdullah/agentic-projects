@@ -16,9 +16,9 @@ function App() {
         <main className="flex-1 overflow-auto">
           <Routes>
             <Route path="/" element={<HomePage />} />
-            <Route path="/basic-agent" element={<BasicAgentPage />} />
-            <Route path="/intermediate-agent" element={<IntermediateAgentPage />} />
-            <Route path="/advanced-agent" element={<AdvancedAgentPage />} />
+            <Route path="/patient-intake" element={<BasicAgentPage />} />
+            <Route path="/specialist-consultation" element={<IntermediateAgentPage />} />
+            <Route path="/clinical-document" element={<AdvancedAgentPage />} />
             <Route path="/specialist" element={<SpecialistPage />} />
             <Route path="/patient" element={<PatientPage />} />
           </Routes>

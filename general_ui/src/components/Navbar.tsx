@@ -14,7 +14,7 @@ export default function Navbar() {
             <div className="w-8 h-8 bg-gradient-to-br from-purple-400 to-pink-600 rounded-lg flex items-center justify-center group-hover:shadow-lg group-hover:shadow-purple-500/50 transition-all">
               <span className="text-white font-bold text-lg">A</span>
             </div>
-            <span className="text-white font-bold text-xl hidden sm:inline">Gezonheid</span>
+            <span className="text-white font-bold text-xl hidden sm:inline">HealthCare</span>
           </Link>
 
           {/* Desktop Menu */}
@@ -22,14 +22,14 @@ export default function Navbar() {
             <Link to="/" className="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium transition-colors hover:bg-slate-700 rounded-md">
               Home
             </Link>
-            <Link to="/basic-agent" className="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium transition-colors hover:bg-slate-700 rounded-md">
-              Basic Agent
+            <Link to="/patient-intake" className="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium transition-colors hover:bg-slate-700 rounded-md">
+              Patient Intake
             </Link>
-            <Link to="/intermediate-agent" className="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium transition-colors hover:bg-slate-700 rounded-md">
-              Intermediate Agent
+            <Link to="/specialist-consultation" className="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium transition-colors hover:bg-slate-700 rounded-md">
+              Specialist Consultation
             </Link>
-            <Link to="/advanced-agent" className="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium transition-colors hover:bg-slate-700 rounded-md">
-              Advanced Agent
+            <Link to="/clinical-document" className="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium transition-colors hover:bg-slate-700 rounded-md">
+              Clinical Document
             </Link>
           </div>
 
@@ -49,13 +49,13 @@ export default function Navbar() {
               Home
             </Link>
             <Link to="/basic-agent" className="block text-gray-300 hover:text-white px-3 py-2 text-sm font-medium hover:bg-slate-700 rounded-md">
-              Basic Agent
+              Patient Intake
             </Link>
             <Link to="/intermediate-agent" className="block text-gray-300 hover:text-white px-3 py-2 text-sm font-medium hover:bg-slate-700 rounded-md">
-              Intermediate Agent
+              Specialist Consultation
             </Link>
             <Link to="/advanced-agent" className="block text-gray-300 hover:text-white px-3 py-2 text-sm font-medium hover:bg-slate-700 rounded-md">
-              Advanced Agent
+              Medical Analysis
             </Link>
           </div>
         )}
